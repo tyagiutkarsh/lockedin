@@ -4,7 +4,7 @@ let allowedNavigations = {};
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.get(['blockedSites', 'timerDuration'], (result) => {
     const defaults = {
-      blockedSites: !result.blockedSites ? ['youtube.com', 'x.com', 'linkedin.com'] : result.blockedSites,
+      blockedSites: !result.blockedSites ? ['youtube.com', 'x.com', 'linkedin.com', 'twitter.com'] : result.blockedSites,
       timerDuration: !result.timerDuration ? 10 : result.timerDuration,
     };
     chrome.storage.local.set(defaults);
