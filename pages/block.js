@@ -53,10 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 action: 'unlockSite',
                 site: matchedSite,
                 durationMinutes: duration
+            }, (response) => {
+                if (response && response.unlocked) {
+                    // 4f. Redirect to original URL
+                    window.location.href = redirectUrl;
+                }
             });
-
-            // 4f. Redirect to original URL
-            window.location.href = redirectUrl;
         });
     });
 });

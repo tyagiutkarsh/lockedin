@@ -48,7 +48,6 @@ chrome.webNavigation.onBeforeNavigate.addListener(
   }
 );
 
-// Listen for messages from other parts of the extension
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'unlockSite') {
         const { site, durationMinutes } = message;
@@ -68,9 +67,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 chrome.scripting.executeScript({
                     target: { tabId: tabId },
                     files: ['content/timer.js']
+                }, () => {
+                    sendResponse({unlocked: true});
                 });
             });
         });
+        return true; // Indicates that the response is sent asynchronously
     } else if (message.action === 'reblockSite') {
         // This message comes from the timer when it expires
         const tab = sender.tab;
