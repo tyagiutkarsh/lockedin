@@ -1,18 +1,26 @@
-# Locked In Extension
+# Locked In
 
-This document outlines a common issue encountered during development and its resolution.
+Locked In is a browser extension designed to help you stay focused by blocking distracting websites. Set a timer, and for that duration, you won't be able to access the websites you've configured as distracting.
 
-## Problem: Extension failed to load with "Could not load icon" and "Could not load manifest" errors.
+## Features
 
-When attempting to load the unpacked extension into Chrome, the following errors were displayed:
+*   **Website Blocking**: Block a list of websites to avoid distractions.
+*   **Timer**: Set a timer to enforce the block for a specific duration.
+*   **Usage Tracking**: Track the time spent on different websites.
+*   **Customizable Block Page**: A custom page is shown when a blocked website is accessed.
 
-- `Could not load icon 'icons/icon16.png' specified in 'icons'.`
-- `Could not load manifest.`
+## How to Use
 
-**Root Cause:**
-Upon investigation, it was found that the icon files (`icons/icon16.png`, `icons/icon48.png`, `icons/icon128.png`) were empty. Chrome's extension loader failed when encountering these empty files, leading to the icon loading error, which subsequently caused the manifest loading to fail.
+1.  **Configure the list of blocked websites**: Go to the extension's options page and add the websites you want to block.
+2.  **Set the timer**: Open the extension's popup and set the timer for how long you want to stay focused.
+3.  **Start the timer**: Once the timer starts, the configured websites will be blocked.
+4.  **View your stats**: The popup also shows a chart of your browsing habits.
 
-**Resolution:**
-The empty icon files were replaced with placeholder content. Although these placeholders are not valid image files, their non-empty status allowed the Chrome extension loader to proceed without the "Could not load icon" error, thus resolving the "Could not load manifest" error as well.
+## Installation
 
-**Note:** For a production environment, these placeholder files should be replaced with actual, correctly formatted PNG images.
+### From source
+
+1.  Clone this repository.
+2.  Open Chrome and navigate to `chrome://extensions/`.
+3.  Enable "Developer mode".
+4.  Click on "Load unpacked" and select the cloned repository's directory.
