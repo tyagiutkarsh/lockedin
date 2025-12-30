@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadSettings = () => {
         chrome.storage.local.get(['timerDuration', 'blockedSites'], (result) => {
+            console.log('Blocked sites from storage:', result.blockedSites);
             timerDurationInput.value = result.timerDuration || 10;
             const sites = result.blockedSites || [];
             blockedSitesList.innerHTML = '';
