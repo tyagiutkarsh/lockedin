@@ -49,8 +49,8 @@ chrome.webNavigation.onBeforeNavigate.addListener(
 );
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'unlockSite') {
-        const { site, durationMinutes } = message;
+    if (message.action === 'unlockAndRedirect') {
+        const { site, durationMinutes, redirectUrl } = message;
         const tabId = sender.tab.id;
 
         chrome.storage.local.get('unlockedSites', (result) => {
@@ -59,10 +59,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             unlockedSites[site] = { unlockedUntil };
             
             chrome.storage.local.set({ unlockedSites }, () => {
-                sendResponse({unlocked: true});
+                // Redirect the tab to the original URL
+                chrome.tabs.update(tabId, { url: redirectUrl });
             });
         });
-        return true; // Indicates that the response is sent asynchronously
     } else if (message.action === 'reblockSite') {
         // This message comes from the timer when it expires
         const tab = sender.tab;

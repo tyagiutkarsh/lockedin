@@ -47,16 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             chrome.storage.local.set({ usageData }, () => {
-                // 4e. Message background to unlock site
+                // 4e. Message background to unlock site and redirect
                 chrome.runtime.sendMessage({
-                    action: 'unlockSite',
+                    action: 'unlockAndRedirect',
                     site: matchedSite,
-                    durationMinutes: duration
-                }, (response) => {
-                    if (response && response.unlocked) {
-                        // 4f. Redirect to original URL
-                        window.location.href = redirectUrl;
-                    }
+                    durationMinutes: duration,
+                    redirectUrl: redirectUrl
                 });
             });
         });
