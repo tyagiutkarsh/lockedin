@@ -1,4 +1,5 @@
 let allowedNavigations = {};
+console.log('Background script loaded.');
 
 // Initialize default settings on installation
 chrome.runtime.onInstalled.addListener(() => {
@@ -14,6 +15,7 @@ chrome.runtime.onInstalled.addListener(() => {
 // The core blocking logic
 chrome.webNavigation.onBeforeNavigate.addListener(
   (details) => {
+    console.log('onBeforeNavigate:', details.url);
     // Skip frames, only react to main page navigation
     if (details.frameId !== 0) {
       return;
@@ -21,7 +23,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(
 
     // Check if this navigation is on the temporary whitelist
     if (allowedNavigations[details.tabId] === details.url) {
-        // It's allowed, so remove it from the whitelist and let it proceed
+        console.log('Navigation allowed by whitelist for tab:', details.tabId);
         delete allowedNavigations[details.tabId];
         return;
     }
@@ -59,19 +61,21 @@ chrome.webNavigation.onBeforeNavigate.addListener(
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'unlockAndRedirect') {
+        console.log('unlockAndRedirect message received:', message);
         const { site, durationMinutes, redirectUrl } = message;
         const tabId = sender.tab.id;
 
-        // Add to a temporary whitelist before storage update and redirection
         allowedNavigations[tabId] = redirectUrl;
+        console.log('Whitelist updated:', allowedNavigations);
 
         chrome.storage.local.get('unlockedSites', (result) => {
+            console.log('Storage.get unlockedSites:', result.unlockedSites);
             const unlockedSites = result.unlockedSites || {};
             const unlockedUntil = new Date().getTime() + durationMinutes * 60 * 1000;
             unlockedSites[site] = { unlockedUntil };
             
             chrome.storage.local.set({ unlockedSites }, () => {
-                // Redirect the tab to the original URL
+                console.log('Storage.set unlockedSites complete. Redirecting tab:', tabId, 'to:', redirectUrl);
                 chrome.tabs.update(tabId, { url: redirectUrl });
             });
         });
