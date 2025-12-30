@@ -19,17 +19,35 @@
     "default_popup": "popup/popup.html",
     "default_title": "locked in"
   },
+  "options_page": "dashboard/dashboard.html",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "css": [
+        "content/timer.css"
+      ],
+      "js": [
+        "content/timer.js"
+      ]
+    }
+  ],
   "web_accessible_resources": [
     {
       "resources": [
         "pages/block.html",
         "pages/block.js",
-        "pages/block.css"
+        "pages/block.css",
+        "dashboard/dashboard.html",
+        "dashboard/dashboard.css",
+        "dashboard/dashboard.js",
+        "lib/chart.js"
       ],
       "matches": [
         "<all_urls>"
