@@ -1,3 +1,5 @@
+let allowedNavigations = {};
+
 // Initialize default settings on installation
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.get(['blockedSites', 'timerDuration'], (result) => {
@@ -15,6 +17,13 @@ chrome.webNavigation.onBeforeNavigate.addListener(
     // Skip frames, only react to main page navigation
     if (details.frameId !== 0) {
       return;
+    }
+
+    // Check if this navigation is on the temporary whitelist
+    if (allowedNavigations[details.tabId] === details.url) {
+        // It's allowed, so remove it from the whitelist and let it proceed
+        delete allowedNavigations[details.tabId];
+        return;
     }
 
     const url = new URL(details.url);
@@ -52,6 +61,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'unlockAndRedirect') {
         const { site, durationMinutes, redirectUrl } = message;
         const tabId = sender.tab.id;
+
+        // Add to a temporary whitelist before storage update and redirection
+        allowedNavigations[tabId] = redirectUrl;
 
         chrome.storage.local.get('unlockedSites', (result) => {
             const unlockedSites = result.unlockedSites || {};
