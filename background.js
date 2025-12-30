@@ -59,17 +59,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             unlockedSites[site] = { unlockedUntil };
             
             chrome.storage.local.set({ unlockedSites }, () => {
-                // Inject the timer script and CSS into the now-unlocked tab
-                chrome.scripting.insertCSS({
-                    target: { tabId: tabId },
-                    files: ['content/timer.css']
-                });
-                chrome.scripting.executeScript({
-                    target: { tabId: tabId },
-                    files: ['content/timer.js']
-                }, () => {
-                    sendResponse({unlocked: true});
-                });
+                sendResponse({unlocked: true});
             });
         });
         return true; // Indicates that the response is sent asynchronously
