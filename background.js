@@ -36,10 +36,12 @@ chrome.webNavigation.onBeforeNavigate.addListener(
     }
 
     chrome.storage.local.get(['blockedSites', 'unlockedSites'], (result) => {
+      console.log('Background - Blocked sites from storage:', result.blockedSites); // ADDED LOG
       const blockedSites = result.blockedSites || [];
       const unlockedSites = result.unlockedSites || {};
 
-      const matchedSite = blockedSites.find(site => url.hostname.includes(site));
+      const matchedSite = blockedSites.find(site => url.hostname.includes(site)); // <<< THIS IS THE KEY LINE
+      console.log('Background - Matched site:', matchedSite, 'for hostname:', url.hostname); // ADDED LOG
 
       if (matchedSite) {
         const siteData = unlockedSites[matchedSite];
