@@ -43,7 +43,7 @@ header h1 {
     color: var(--primary-color);
 }
 
-textarea {
+input[type="text"] {
     width: 100%;
     background-color: var(--input-bg-color);
     color: var(--text-color);
@@ -52,12 +52,11 @@ textarea {
     padding: 10px;
     font-family: inherit;
     font-size: 1rem;
-    resize: vertical;
     margin-bottom: 1.5rem;
     box-sizing: border-box; /* Ensures padding doesn't affect width */
 }
 
-textarea:focus {
+input[type="text"]:focus {
     outline: none;
     border-color: var(--primary-color);
 }
