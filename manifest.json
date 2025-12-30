@@ -2,7 +2,7 @@
   "name": "locked in",
   "version": "1.0",
   "manifest_version": 3,
-  "description": "A tool for mindful browsing, designed with a technical and utilitarian feel.",
+  "description": "Attention is deliberate.",
   "permissions": [
     "storage",
     "webNavigation",
@@ -17,7 +17,7 @@
   },
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "locked in"
+    "default_title": "locked-in"
   },
 
   "icons": {
