@@ -16,20 +16,19 @@
         
         document.body.appendChild(overlay);
 
-        updateTimer(expiresIn, timeEl, overlay);
-
-        timerInterval = setInterval(() => {
+        const update = () => {
             const newExpiresIn = expiresIn - Date.now();
             updateTimer(newExpiresIn, timeEl, overlay);
-        }, 1000);
+        };
+
+        update();
+        timerInterval = setInterval(update, 1000);
     };
 
     const updateTimer = (milliseconds, timeEl, overlay) => {
         if (milliseconds <= 0) {
             timeEl.textContent = '00:00';
             clearInterval(timerInterval);
-            // Inform background script to re-block
-            chrome.runtime.sendMessage({ action: 'reblockSite' });
             overlay.remove();
         } else {
             const totalSeconds = Math.floor(milliseconds / 1000);
@@ -40,16 +39,26 @@
     };
 
     const currentHostname = window.location.hostname;
-    const matchedSite = currentHostname.split('.').slice(-2).join('.');
-    
-    chrome.storage.local.get('unlockedSites', (result) => {
-        const unlockedSites = result.unlockedSites || {};
-        const siteData = unlockedSites[matchedSite];
+    const site = currentHostname.replace(/^(www\.)?/, '');
 
-        if (siteData && siteData.unlockedUntil) {
-            const expiresIn = siteData.unlockedUntil - Date.now();
-            if (expiresIn > 0) {
-                createTimerOverlay(siteData.unlockedUntil);
+    chrome.runtime.sendMessage({ action: 'getTimerState', site: site }, (response) => {
+        if (response && response.unlockedUntil) {
+            createTimerOverlay(response.unlockedUntil);
+        }
+    });
+
+    // Listen for timer updates from the background script
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.action === 'timerUpdate' && message.site === site) {
+            if (message.unlockedUntil) {
+                createTimerOverlay(message.unlockedUntil);
+            } else {
+                // If the timer is cleared, remove the overlay
+                const overlay = document.getElementById('locked-in-timer-overlay');
+                if (overlay) {
+                    overlay.remove();
+                    clearInterval(timerInterval);
+                }
             }
         }
     });

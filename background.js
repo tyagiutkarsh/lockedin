@@ -69,16 +69,64 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             unlockedSites[site] = { unlockedUntil };
             
             chrome.storage.local.set({ unlockedSites }, () => {
+                // Create an alarm to re-block the site when the timer expires
+                chrome.alarms.create(site, { when: unlockedUntil });
+
+                // Notify all tabs of the site to update their timers
+                chrome.tabs.query({ url: [`*://${site}/*`, `*://*.${site}/*`] }, (tabs) => {
+                    tabs.forEach(tab => {
+                        chrome.tabs.sendMessage(tab.id, { action: 'timerUpdate', site: site, unlockedUntil: unlockedUntil });
+                    });
+                });
+
                 chrome.tabs.update(tabId, { url: redirectUrl });
             });
         });
-    } else if (message.action === 'reblockSite') {
-        // This message comes from the timer when it expires
-        const tab = sender.tab;
-        if (tab) {
-             const blockerUrl = chrome.runtime.getURL('pages/block.html');
-             const redirectUrl = `${blockerUrl}?redirect=${encodeURIComponent(tab.url)}`;
-             chrome.tabs.update(tab.id, { url: redirectUrl });
-        }
+        return true; // Indicates that the response is sent asynchronously
+    } else if (message.action === 'getTimerState') {
+        const { site } = message;
+        chrome.storage.local.get('unlockedSites', (result) => {
+            const unlockedSites = result.unlockedSites || {};
+            const siteData = unlockedSites[site];
+            if (siteData && siteData.unlockedUntil) {
+                const expiresIn = siteData.unlockedUntil - Date.now();
+                if (expiresIn > 0) {
+                    sendResponse({ unlockedUntil: siteData.unlockedUntil });
+                } else {
+                    sendResponse({ unlockedUntil: null });
+                }
+            } else {
+                sendResponse({ unlockedUntil: null });
+            }
+        });
+        return true; // Required for async sendResponse
     }
+});
+
+// Handle alarm event to re-block sites
+chrome.alarms.onAlarm.addListener((alarm) => {
+    const site = alarm.name;
+    chrome.storage.local.get('unlockedSites', (result) => {
+        const unlockedSites = result.unlockedSites || {};
+        if (unlockedSites[site]) {
+            delete unlockedSites[site];
+            chrome.storage.local.set({ unlockedSites }, () => {
+                // Find all tabs for the site and re-block them
+                chrome.tabs.query({ url: `*://${site}/*` }, (tabs) => {
+                    const blockerUrl = chrome.runtime.getURL('pages/block.html');
+                    tabs.forEach(tab => {
+                        const redirectUrl = `${blockerUrl}?redirect=${encodeURIComponent(tab.url)}`;
+                        chrome.tabs.update(tab.id, { url: redirectUrl });
+                    });
+                });
+                 chrome.tabs.query({ url: `*://*.${site}/*` }, (tabs) => {
+                    const blockerUrl = chrome.runtime.getURL('pages/block.html');
+                    tabs.forEach(tab => {
+                        const redirectUrl = `${blockerUrl}?redirect=${encodeURIComponent(tab.url)}`;
+                        chrome.tabs.update(tab.id, { url: redirectUrl });
+                    });
+                });
+            });
+        }
+    });
 });
