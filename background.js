@@ -112,14 +112,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
             delete unlockedSites[site];
             chrome.storage.local.set({ unlockedSites }, () => {
                 // Find all tabs for the site and re-block them
-                chrome.tabs.query({ url: `*://${site}/*` }, (tabs) => {
-                    const blockerUrl = chrome.runtime.getURL('pages/block.html');
-                    tabs.forEach(tab => {
-                        const redirectUrl = `${blockerUrl}?redirect=${encodeURIComponent(tab.url)}`;
-                        chrome.tabs.update(tab.id, { url: redirectUrl });
-                    });
-                });
-                 chrome.tabs.query({ url: `*://*.${site}/*` }, (tabs) => {
+                chrome.tabs.query({ url: `*://*.${site}/*` }, (tabs) => {
                     const blockerUrl = chrome.runtime.getURL('pages/block.html');
                     tabs.forEach(tab => {
                         const redirectUrl = `${blockerUrl}?redirect=${encodeURIComponent(tab.url)}`;
