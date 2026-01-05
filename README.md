@@ -1,5 +1,7 @@
 # Locked In
 
+Update: This is pending approval from Chrome Developers team. Will add link here once approved
+
 Locked In is a browser extension designed to help you stay focused by blocking distracting websites. Set a timer, and for that duration, you won't be able to access the websites you've configured as distracting.
 
 ## Features
